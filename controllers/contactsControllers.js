@@ -43,7 +43,7 @@ export const createContact = async (req, res) => {
     try {
         const { error } = createContactSchema.validate(req.body);
         if (error) {
-            throw HttpError(400, error.message);
+            return res.status(400).json({ message: error.message });
         }
 
         const { name, email, phone } = req.body;
@@ -59,9 +59,9 @@ export const updateContact = async (req, res) => {
         const { id } = req.params;
         const { error } = updateContactSchema.validate(req.body);
         if (error) {
-            throw HttpError(400, error.message);
+            return res.status(400).json({ message: "Body must have at least one field" });
         }
-
+        
         const updatedContact = await contactsService.updateContact(id, req.body);
         if (updatedContact) {
             res.status(200).json(updatedContact);
