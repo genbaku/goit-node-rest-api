@@ -9,7 +9,7 @@ export const getAllContacts = async (req, res) => {
             limit: parseInt(limit, 10),
         };
 
-        let filter = {};
+        let filter = { owner: req.user.id };
 
         if (favorite === 'true') {
             filter.favorite = true;
@@ -25,7 +25,12 @@ export const getAllContacts = async (req, res) => {
 export const getOneContact = async (req, res) => {
     try {
         const { id } = req.params;
-        const contact = await Contact.findById(id);
+        // const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        // if (!objectIdPattern.test(id)) {
+        //     return res.status(404).json({ message: "Not found" });
+        // }
+        const userId = req.user.id;
+        const contact = await Contact.findOne({ _id: id, owner: userId });  
         if (contact) {
             res.status(200).json(contact);
         } else {
@@ -39,7 +44,10 @@ export const getOneContact = async (req, res) => {
 export const deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedContact = await Contact.findByIdAndDelete(id);
+        const userId = req.user.id;
+
+        const deletedContact = await Contact.findOneAndDelete({ _id: id, owner: userId });
+
         if (deletedContact) {
             res.status(200).json(deletedContact);
         } else {
@@ -58,7 +66,8 @@ export const createContact = async (req, res) => {
         }
 
         const { name, email, phone } = req.body;
-        const newContact = new Contact({ name, email, phone });
+        const userId = req.user.id;
+        const newContact = new Contact({ name, email, phone, owner: userId });
         await newContact.save();
         res.status(201).json(newContact);
     } catch (error) {
@@ -74,7 +83,7 @@ export const updateContact = async (req, res) => {
             return res.status(400).json({ message: error.message });
         }
         
-        const updatedContact = await Contact.findByIdAndUpdate(id, req.body, { new: true });
+        const updatedContact = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, req.body, { new: true });
         if (updatedContact) {
             res.status(200).json(updatedContact);
         } else {
@@ -90,8 +99,7 @@ export const updateContactStatus = async (req, res) => {
         const { contactId } = req.params;
         const { favorite } = req.body;
 
-        const updatedContact = await Contact.findByIdAndUpdate(contactId, { favorite }, { new: true });
-
+        const updatedContact = await Contact.findOneAndUpdate({ _id: contactId, owner: req.user.id }, { favorite }, { new: true });
         if (updatedContact) {
             res.status(200).json(updatedContact);
         } else {
