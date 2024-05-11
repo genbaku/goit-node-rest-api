@@ -3,8 +3,20 @@ import { createContactSchema, updateContactSchema } from "../schemas/contactsSch
 
 export const getAllContacts = async (req, res) => {
     try {
-        const contacts = await Contact.find();
-        res.status(200).json(contacts);
+        const { page = 1, limit = 20, favorite } = req.query;
+        const options = {
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+        };
+
+        let filter = {};
+
+        if (favorite === 'true') {
+            filter.favorite = true;
+        }
+
+        const result = await Contact.paginate(filter, options);
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

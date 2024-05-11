@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
+import { Schema } from "mongoose";
+
 
 const contactSchema = new mongoose.Schema({
     name: {
@@ -14,7 +17,13 @@ const contactSchema = new mongoose.Schema({
     favorite: {
         type: Boolean,
         default: false,
-    }
-})
+    },
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User', 
+    },
+}, { versionKey: false });
+
+contactSchema.plugin(mongoosePaginate);
 
 export default mongoose.model("Contact", contactSchema);
