@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    avatarURL: {
+        type: String,
+    }
 }, { versionKey: false });
 
 export default mongoose.model("User", userSchema);
